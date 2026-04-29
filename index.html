@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste API OpenAI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: monospace;
+      background: #0f0f0f;
+      color: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    h1 {
+      font-size: 1rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #f0f0f0;
+      font-family: monospace;
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 100px;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #555;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #f0f0f0;
+      color: #0f0f0f;
+      border: none;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    #resposta {
+      padding: 1rem;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      min-height: 80px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>// teste openai api via netlify function</h1>
+    <textarea id="pergunta" placeholder="Escreve a tua pergunta aqui..."></textarea>
+    <button id="btn" onclick="enviar()">Enviar</button>
+    <div id="resposta">A resposta vai aparecer aqui.</div>
+  </div>
+
+  <script>
+    async function enviar() {
+      const pergunta = document.getElementById('pergunta').value.trim();
+      const resposta = document.getElementById('resposta');
+      const btn = document.getElementById('btn');
+
+      if (!pergunta) return;
+
+      btn.disabled = true;
+      btn.textContent = 'A processar...';
+      resposta.textContent = '...';
+
+      try {
+        const res = await fetch('/.netlify/functions/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mensagem: pergunta })
+        });
+
+        const data = await res.json();
+        resposta.textContent = data.resposta || 'Sem resposta.';
+      } catch (err) {
+        resposta.textContent = 'Erro: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar';
+      }
+    }
+  </script>
+</body>
+</html>
